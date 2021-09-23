@@ -1,4 +1,4 @@
-name: utm_no
+name: utm-no
 base: core18
 version: 'git'
 summary: Remove tracking parameters from copied URLs
