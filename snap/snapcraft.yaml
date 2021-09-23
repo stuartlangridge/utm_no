@@ -23,7 +23,7 @@ parts:
   launcher:
     plugin: dump
     source: snap/local/
-  hushboard:
+  utm-no:
     plugin: dump
     source: https://github.com/stuartlangridge/utm_no.git
     stage-packages:
@@ -36,7 +36,7 @@ parts:
       - bin/*
 
 apps:
-  hushboard:
+  utm-no:
     extensions: [gnome-3-34]
     environment:
       PYTHONPATH: $SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
