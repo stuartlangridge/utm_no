@@ -1,0 +1,3 @@
+#!/bin/bash
+cd $SNAP
+/usr/bin/python3 -m utm_no "$@"

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=utm_no
+Comment=Remove tracking parameters from copied URLs
+Comment[en_US]=Remove tracking parameters from copied URLs
+GenericName=utm_no
+GenericName[en_US]=utm_no
+Icon=${SNAP}/utm_no/icons/utm_no.svg
+Exec=utm_no
+Terminal=false
+Keywords=links;tracking;privacy;urls;clipboard;
+Categories=GTK;

@@ -1,0 +1,45 @@
+name: utm_no
+base: core18
+version: 'git'
+summary: Remove tracking parameters from copied URLs
+description: |
+  You know how when you get a link from somewhere it's got all that 
+  utm_source=exploiter&utm_medium=banner rubbish in it? And as a service when
+  you're pasting this oh-so-hilarious link to your friends so they can share
+  in the joy, you remove all that stuff?
+  What if the computer did it for you?
+  Yeah. Clearly it should. Now it does. utm_no sits in your panel and
+  automatically removes tracking rubbish from links that you copy.
+grade: stable
+confinement: strict
+
+architectures:
+  - build-on: amd64
+  - build-on: i386
+  - build-on: arm64
+  - build-on: armhf
+
+parts:
+  launcher:
+    plugin: dump
+    source: snap/local/
+  hushboard:
+    plugin: dump
+    source: https://github.com/stuartlangridge/utm_no.git
+    stage-packages:
+      - gir1.2-appindicator3-0.1
+    prime:
+      - usr/lib/girepository-1.0/AppIndicator3-0.1.typelib
+      - usr/lib/*/libappindicator3.so.*
+      - usr/lib/python3/dist-packages/*
+      - utm_no/*
+      - bin/*
+
+apps:
+  hushboard:
+    extensions: [gnome-3-34]
+    environment:
+      PYTHONPATH: $SNAP/usr/lib/python3/dist-packages:$PYTHONPATH
+    command: bin/launcher
+    plugs:
+      - x11
