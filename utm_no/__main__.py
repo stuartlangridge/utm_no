@@ -83,11 +83,13 @@ class UTMNOIndicator(GObject.GObject):
         # primary = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
         # primary.connect('owner-change', clipboardChanged)
 
+        self.fix_urls_in_text = True # hardcode this on for now; we fix URLs within copied text
+
     def handleText(self, clipboard, text):
         if url_handler.is_url(text.strip()):
             # if the text is nothing but a URL, handle it always
             new_text = url_handler.fix_text(text)
-        elif False:
+        elif self.fix_urls_in_text:
             # if the setting is on, process the whole text and handle all URLs within it
             new_text = url_handler.fix_text(text)
         else:
@@ -145,7 +147,7 @@ class UTMNOIndicator(GObject.GObject):
         dialog.set_website('https://kryogenix.org/code/utm_no')
         dialog.set_website_label('kryogenix.org/code/utm_no')
         dialog.set_comments("Remove tracking parameters from copied links")
-        dialog.set_logo(GdkPixbuf.Pixbuf.new_from_file(self.app_icon))
+        dialog.set_logo(GdkPixbuf.Pixbuf.new_from_file_at_size(self.app_icon, 64, 64))
         dialog.connect('response', lambda *largs: dialog.destroy())
         dialog.run()
 
