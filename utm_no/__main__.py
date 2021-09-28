@@ -56,6 +56,7 @@ class UTMNOIndicator(GObject.GObject):
             APP_ID, self.panel_eyes_closed_icon,
             AppIndicator.IndicatorCategory.HARDWARE)
         self.ind.set_status(AppIndicator.IndicatorStatus.ACTIVE)
+        self.ind.set_title(APP_NAME)
 
         self.menu = Gtk.Menu()
         self.ind.set_menu(self.menu)
