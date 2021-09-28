@@ -45,7 +45,7 @@ class UTMNOIndicator(GObject.GObject):
         GObject.GObject.__init__(self)
 
         icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "icons"))
-        self.panel_eyes_closed_icon = os.path.abspath(os.path.join(icon_path, "panel-eyes-closed.svg"))
+        self.panel_eyes_closed_icon = os.path.abspath(os.path.join(icon_path, "panel-eyes-full-closed.svg"))
         self.panel_eyes_left_icon = os.path.abspath(os.path.join(icon_path, "panel-eyes-left.svg"))
         self.panel_eyes_right_icon = os.path.abspath(os.path.join(icon_path, "panel-eyes-right.svg"))
         self.panel_eyes_half_right_icon = os.path.abspath(os.path.join(icon_path, "panel-eyes-half-right.svg"))
