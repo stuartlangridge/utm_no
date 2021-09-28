@@ -143,7 +143,7 @@ class UTMNOIndicator(GObject.GObject):
         dialog.set_license(APP_LICENCE)
         dialog.set_version(APP_VERSION)
         dialog.set_website('https://kryogenix.org/code/utm_no')
-        dialog.set_website_label('kryogenix.org')
+        dialog.set_website_label('kryogenix.org/code/utm_no')
         dialog.set_comments("Remove tracking parameters from copied links")
         dialog.set_logo(GdkPixbuf.Pixbuf.new_from_file(self.app_icon))
         dialog.connect('response', lambda *largs: dialog.destroy())
