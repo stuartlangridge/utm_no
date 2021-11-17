@@ -43,3 +43,4 @@ apps:
     command: bin/launcher
     plugs:
       - x11
+      - network
