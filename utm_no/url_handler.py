@@ -13,7 +13,7 @@ STRIP_URL_QUERY_ELEMENTS_STARTS = [
     "ns_", "oly_anon_id", "oly_enc_id", "otc", "pcrid", "piwik_", "pk_",
     "rb_clickid", "redirect_log_mongo_id", "redirect_mongo_id", "ref",
     "s_kwcid", "sb_referer_host", "soc_src", "soc_trk", "spm", "sr_",
-    "srcid", "stm_", "trk_", "utm_", "vero_", "utm-"
+    "srcid", "stm_", "trk_", "twclid", "utm_", "vero_", "utm-"
 ]
 
 # https://stackoverflow.com/a/44645567/1418014
