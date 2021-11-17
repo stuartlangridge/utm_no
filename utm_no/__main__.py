@@ -2,11 +2,13 @@
 import sys
 import os
 import gi
+import json
+import codecs
 
 from . import url_handler
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import GObject, Gtk, GLib, GdkPixbuf, Gdk
+from gi.repository import GObject, Gtk, GLib, GdkPixbuf, Gdk, Gio
 
 gi.require_version('AppIndicator3', '0.1')
 from gi.repository import AppIndicator3 as AppIndicator
@@ -62,10 +64,16 @@ class UTMNOIndicator(GObject.GObject):
         self.ind.set_menu(self.menu)
 
         self.mpaused = Gtk.CheckMenuItem.new_with_mnemonic("_Enabled")
+        self.mpaused.set_active(True)  # set first so we don't call the handler
         self.mpaused.connect("toggled", self.toggle_enabled, None)
-        self.mpaused.set_active(True)
         self.mpaused.show()
         self.menu.append(self.mpaused)
+
+        self.mtco = Gtk.CheckMenuItem.new_with_mnemonic("_Look up Twitter (t.co) links")
+        self.mtco.set_active(False)  # set first so we don't call the handler
+        self.mtco.connect("toggled", self.toggle_tco, None)
+        # self.mtco.show() # don't show this menu item unless we've already asked about using it
+        self.menu.append(self.mtco)
 
         mabout = Gtk.MenuItem.new_with_mnemonic("_About")
         mabout.connect("activate", self.show_about, None)
@@ -84,14 +92,97 @@ class UTMNOIndicator(GObject.GObject):
         # primary.connect('owner-change', clipboardChanged)
 
         self.fix_urls_in_text = True # hardcode this on for now; we fix URLs within copied text
+        GLib.idle_add(self.load_config)
+
+    def get_cache_file(self):
+        return os.path.join(GLib.get_user_config_dir(), "utm_no.json")
+
+    def serialise(self, *args, **kwargs):
+        # yeah, yeah, supposed to use Gio's async file stuff here. But it was
+        # writing corrupted files, and I have no idea why; probably the Python
+        # var containing the data was going out of scope or something. Anyway,
+        # we're only storing a small JSON file, so life's too short to hammer
+        # on this; we'll write with Python and take the hit.
+        fp = codecs.open(self.get_cache_file(), encoding="utf8", mode="w")
+        data = {
+            "enabled": self.mpaused.get_active(),
+            "tco": {
+                "enabled": self.mtco.get_active(),
+                "asked": self.mtco.get_visible()
+            }
+        }
+        json.dump(data, fp, indent=2)
+        fp.close()
+        print("Serialised", data)
+
+    def load_config(self):
+        f = Gio.File.new_for_path(self.get_cache_file())
+        f.load_contents_async(None, self.finish_loading_history)
+
+    def finish_loading_history(self, f, res):
+        try:
+            success, contents, _ = f.load_contents_finish(res)
+        except GLib.Error as e:
+            print(("couldn't restore settings (error: %s)"
+                   ", so assuming they're blank") % (e,))
+            contents = "{}"
+
+        try:
+            data = json.loads(contents)
+        except Exception as e:
+            print(("Warning: settings file seemed to be invalid json"
+                   " (error: %s), so assuming blank") % (e,))
+            data = {}
+        self.mpaused.set_active(data.get("enabled", True))
+        tco = data.get("tco", {})
+        if tco.get("asked", False): self.mtco.show()
+        if tco.get("enabled", False): self.mtco.set_active(True)
+
+    def show_ask_tco_dialogue(self, clipboard, text):
+        dialog = Gtk.MessageDialog(
+            flags=0,
+            message_type=Gtk.MessageType.QUESTION,
+            buttons=Gtk.ButtonsType.NONE,
+            text="Look up Twitter 't.co' links?",
+        )
+        dialog.add_buttons(
+            "Don't ping Twitter", Gtk.ResponseType.NO,
+            "Look up t.co links", Gtk.ResponseType.YES)
+        dialog.format_secondary_text(
+            "This copied text contains a tracking link from Twitter (to a "
+            "t.co URL).\n"
+            "utm_no can look up these links to get the real URL so you don't "
+            "paste the t.co tracking link.\n"
+            "However, this means that Twitter "
+            "will register a 'hit' from your IP address whenever you copy one "
+            "of these links.\n\n"
+            "This feature can be enabled or disabled in future from "
+            "the indicator menu."
+        )
+        response = dialog.run()
+        self.mtco.show()
+        if response == Gtk.ResponseType.YES:
+            self.mtco.set_active(True)
+        elif response == Gtk.ResponseType.NO:
+            self.mtco.set_active(False)
+        self.serialise()
+        dialog.destroy()
+        if response == Gtk.ResponseType.YES:
+            self.handleText(clipboard, text)
 
     def handleText(self, clipboard, text):
+        if not self.mtco.get_visible() and url_handler.contains_tco(text):
+            # this is the first time we've copied a t.co address
+            # ask about whether to handle them
+            self.show_ask_tco_dialogue(clipboard, text)
+            return
+        handle_tco = self.mtco.get_active()
         if url_handler.is_url(text.strip()):
             # if the text is nothing but a URL, handle it always
-            new_text = url_handler.fix_text(text)
+            new_text = url_handler.fix_text(text, handle_tco=handle_tco)
         elif self.fix_urls_in_text:
             # if the setting is on, process the whole text and handle all URLs within it
-            new_text = url_handler.fix_text(text)
+            new_text = url_handler.fix_text(text, handle_tco=handle_tco)
         else:
             return text
         if new_text == text:
@@ -134,6 +225,10 @@ class UTMNOIndicator(GObject.GObject):
             self.ind.set_icon_full(self.panel_eyes_closed_icon, f"{APP_NAME} running")
         else:
             self.ind.set_icon_full(self.panel_disabled_icon, f"{APP_NAME} disabled")
+        GLib.idle_add(self.serialise)
+
+    def toggle_tco(self, widget, *args):
+        GLib.idle_add(self.serialise)
 
     def quit(self, *args):
         GLib.timeout_add(100, lambda *args: Gtk.main_quit())

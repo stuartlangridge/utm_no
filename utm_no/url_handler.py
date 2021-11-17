@@ -3,6 +3,7 @@
 import re
 import urllib.parse
 import unittest
+import requests
 
 # from https://github.com/rknightuk/TrackerZapper/blob/main/TrackerZapper/AppDelegate.swift#L160
 STRIP_URL_QUERY_ELEMENTS_STARTS = [
@@ -55,8 +56,18 @@ URL_REGEX = re.compile(r"""
     )
 """, re.VERBOSE)
 
+REDIRECT_CACHE = {}
 
-def fix_url(url):
+
+def follow_redirects(url):
+    if url in REDIRECT_CACHE:
+        return REDIRECT_CACHE[url]
+    response = requests.get(url)
+    REDIRECT_CACHE[url] = response.url
+    return response.url
+
+
+def fix_url(url, handle_tco=False):
     """Removes all querystring params with a prohibited prefix.
     Call this with actual URLs only.
     Must return text unchanged if there is no replacing to be done."""
@@ -67,19 +78,26 @@ def fix_url(url):
         k for k in qs_keys
         if not any([k.startswith(b) for b in STRIP_URL_QUERY_ELEMENTS_STARTS])
     ]
-    if len(ok_qs_keys) == len(qs_keys): return url  # if removed nothing, bail
-    nqs = dict([(k, qs[k]) for k in ok_qs_keys])
-    parsed = parsed._replace(query=urllib.parse.urlencode(nqs, doseq=True))
-    return urllib.parse.urlunsplit(parsed)
+    if len(ok_qs_keys) == len(qs_keys):
+        endurl = url  # if removed nothing, change nothing
+    else:
+        nqs = dict([(k, qs[k]) for k in ok_qs_keys])
+        parsed = parsed._replace(query=urllib.parse.urlencode(nqs, doseq=True))
+        endurl = urllib.parse.urlunsplit(parsed)
+    if handle_tco and parsed.netloc == "t.co":
+        endurl = follow_redirects(endurl)
+    return endurl
 
 
-def fix_match_object(mo):
-    return fix_url(mo.group(0))
+def fix_match_object(mo, handle_tco=False):
+    return fix_url(mo.group(0), handle_tco)
 
 
-def fix_text(text):
-    """Fixes all URLs within text."""
-    return URL_REGEX.sub(fix_match_object, text)
+def fix_text(text, handle_tco=False):
+    """Fixes all URLs within text.
+    If handle_tco is True, will also blockingly(!) resolve t.co links
+    """
+    return URL_REGEX.sub(lambda mo: fix_match_object(mo, handle_tco), text)
 
 
 def is_url(s):
@@ -87,6 +105,11 @@ def is_url(s):
     if type(s) is not str:
         return False
     return bool(URL_REGEX.match(s))
+
+
+def contains_tco(text):
+    urls_in_text = URL_REGEX.findall(text)
+    return any([urllib.parse.urlparse(u).netloc == "t.co" for u in urls_in_text])
 
 
 class TestIsUrl(unittest.TestCase):
@@ -223,6 +246,55 @@ class TestFixText(unittest.TestCase):
             https://kryogenix.org?a=1
             right here
         """)
+
+    def test_with_tco(self):
+        self.assertEqual(
+            fix_text(
+                "Go to https://t.co/pyzgkqT1xH?amp=1 for victory",
+                handle_tco=True
+            ),
+            "Go to https://www.ietf.org/id/draft-schoen-intarea-unicast-127-00.html for victory"
+        )
+        self.assertEqual(
+            fix_text(
+                "Go to https://kryogenix.org for victory",
+                handle_tco=True
+            ),
+            "Go to https://kryogenix.org for victory"
+        )
+        self.assertNotEqual(
+            fix_text(
+                "Go to https://kryogenix.org for victory",
+                handle_tco=True
+            ),
+            "Go to https://kryogenix.org/ for victory" # extra slash: redirect NOT followed
+        )
+
+
+class TestContainsTco(unittest.TestCase):
+    def test_simple_yes(self):
+        self.assertTrue(contains_tco("https://t.co/abcde"))
+        self.assertTrue(contains_tco("http://t.co/abcde"))
+        self.assertTrue(contains_tco("This text contains https://t.co/abcde and others"))
+        self.assertTrue(contains_tco("first: https://t.co/abcde, second: https://t.co/fghij, done"))
+        self.assertTrue(contains_tco("first:\nhttps://t.co/abcde,\nsecond: https://t.co/fghij,\ndone"))
+
+    def test_simple_no(self):
+        self.assertFalse(contains_tco(""))
+        self.assertFalse(contains_tco("Nope"))
+        self.assertFalse(contains_tco("This text contains https://kryogenix.org and others"))
+        self.assertFalse(contains_tco("https://at.co/123, https://no.t.co/123, t.co/123, all no"))
+
+
+class TestFollowRedirects(unittest.TestCase):
+    def test_examples(self):
+        self.assertEqual(
+            follow_redirects("https://t.co/pyzgkqT1xH?amp=1"),
+            "https://www.ietf.org/id/draft-schoen-intarea-unicast-127-00.html")
+        self.assertEqual(
+            follow_redirects("https://kryogenix.org"), "https://kryogenix.org/")
+        self.assertEqual(
+            follow_redirects("https://kryogenix.org/"), "https://kryogenix.org/")
 
 
 if __name__ == "__main__":
