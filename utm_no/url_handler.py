@@ -4,6 +4,11 @@ import re
 import urllib.parse
 import unittest
 import requests
+import logging
+import os
+
+LOGLEVEL = os.environ.get('LOGLEVEL', 'WARNING').upper()
+logging.basicConfig(level=LOGLEVEL)
 
 # from https://github.com/rknightuk/TrackerZapper/blob/main/TrackerZapper/AppDelegate.swift#L160
 STRIP_URL_QUERY_ELEMENTS_STARTS = [
@@ -61,11 +66,11 @@ REDIRECT_CACHE = {}
 
 def follow_redirects(url):
     if url in REDIRECT_CACHE:
-        print(f"URL {url} -> {REDIRECT_CACHE[url]} (cached)")
+        logging.debug(f"URL {url} -> {REDIRECT_CACHE[url]} (cached)")
         return REDIRECT_CACHE[url]
     response = requests.get(url)
     REDIRECT_CACHE[url] = response.url
-    print(f"URL {url} -> {REDIRECT_CACHE[url]}")
+    logging.debug(f"URL {url} -> {REDIRECT_CACHE[url]}")
     return response.url
 
 
@@ -87,7 +92,7 @@ def fix_url(url, handle_tco=False):
         parsed = parsed._replace(query=urllib.parse.urlencode(nqs, doseq=True))
         endurl = urllib.parse.urlunsplit(parsed)
     if handle_tco and parsed.netloc == "t.co":
-        print("looking up", endurl)
+        logging.debug(f"Looking up t.co URL {endurl} to get ultimate endpoint")
         endurl = follow_redirects(endurl)
     return endurl
 

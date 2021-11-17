@@ -4,6 +4,7 @@ import os
 import gi
 import json
 import codecs
+import logging
 
 from . import url_handler
 
@@ -40,6 +41,9 @@ SOFTWARE.
 
 """
 APP_VERSION = os.environ.get("SNAP_VERSION", "latest")
+
+LOGLEVEL = os.environ.get('LOGLEVEL', 'WARNING').upper()
+logging.basicConfig(level=LOGLEVEL)
 
 
 class UTMNOIndicator(GObject.GObject):
@@ -113,7 +117,7 @@ class UTMNOIndicator(GObject.GObject):
         }
         json.dump(data, fp, indent=2)
         fp.close()
-        print("Serialised", data)
+        logging.debug(f"Serialised {data}")
 
     def load_config(self):
         f = Gio.File.new_for_path(self.get_cache_file())
@@ -123,15 +127,15 @@ class UTMNOIndicator(GObject.GObject):
         try:
             success, contents, _ = f.load_contents_finish(res)
         except GLib.Error as e:
-            print(("couldn't restore settings (error: %s)"
-                   ", so assuming they're blank") % (e,))
+            logging.warn(
+                f"couldn't restore settings (error: {e}), so assuming they're blank")
             contents = "{}"
 
         try:
             data = json.loads(contents)
         except Exception as e:
-            print(("Warning: settings file seemed to be invalid json"
-                   " (error: %s), so assuming blank") % (e,))
+            logging.warn(
+                f"Warning: settings file seemed to be invalid json (error: {e}), so assuming blank")
             data = {}
         self.mpaused.set_active(data.get("enabled", True))
         tco = data.get("tco", {})
@@ -190,7 +194,7 @@ class UTMNOIndicator(GObject.GObject):
 
         # The text has been changed, set it on the clipboard and flash the icon
         clipboard.set_text(new_text, -1)
-        print("Overridden clipboard contents to", repr(new_text))
+        logging.debug(f"Overridden clipboard contents to {repr(new_text)}")
         self.animate_icon()
 
     def animate_icon(self, step=0):
