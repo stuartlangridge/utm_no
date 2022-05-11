@@ -40,7 +40,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 """
-APP_VERSION = os.environ.get("SNAP_VERSION", "latest")
+APP_VERSION = "1.0"
+sv = os.environ.get("SNAP_VERSION")
+if sv:
+    APP_VERSION = f"{sv} (snap)"
+
 
 LOGLEVEL = os.environ.get('LOGLEVEL', 'WARNING').upper()
 logging.basicConfig(level=LOGLEVEL)
@@ -48,6 +52,7 @@ logging.basicConfig(level=LOGLEVEL)
 
 class UTMNOIndicator(GObject.GObject):
     def __init__(self):
+        global APP_VERSION
         GObject.GObject.__init__(self)
 
         icon_path = None
@@ -63,6 +68,7 @@ class UTMNOIndicator(GObject.GObject):
                 real_fs_path = c.get('Instance', 'app-path', fallback=None)
                 if real_fs_path:
                     icon_path = os.path.join(real_fs_path, "utm_no", "icons")
+                    APP_VERSION = f"{APP_VERSION} (flatpak)"
             except Exception as e:
                 logging.error(f"Tried to read /.flatpak-info but failed", e)
         if not icon_path:

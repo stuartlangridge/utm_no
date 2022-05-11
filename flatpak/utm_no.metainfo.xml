@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2022 Stuart Langridge -->
+<component type="desktop-application">
+  <id>utm_no.desktop</id>
+  <launchable type="desktop-id">utm_no.desktop</launchable>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>utm_no</name>
+  <summary>Remove tracking parameters from copied URLs</summary>
+  <description>
+    <p>You know how when you get a link from somewhere it's got all that 
+    <code>utm_source=exploiter, utm_medium=banner</code> rubbish in it? And as a service when
+    you're pasting this oh-so-hilarious link to your friends so they can share
+    in the joy, you remove all that stuff?</p>
+    <p>What if the computer did it for you?</p>
+    <p>Yeah. Clearly it should. Now it does. utm_no sits in your panel and
+    automatically removes tracking rubbish from links that you copy.</p>
+  </description>
+  <provides>
+    <binary>utm-no</binary>
+  </provides>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://img.youtube.com/vi/kXws6EvgAwQ/maxresdefault.jpg</image>
+    </screenshot>
+  </screenshots>
+  <url type="homepage">https://kryogenix.org/code/utm_no/</url>
+  <update_contact>sil at kryogenix.org</update_contact>
+  <content_rating type="oars-1.1" />
+  <developer_name>Stuart Langridge</developer_name>
+  <url type="bugtracker">https://github.com/stuartlangridge/utm_no/issues</url>
+  <url type="donation">https://paypal.me/stuartlangridge</url>
+  <releases>
+    <release date="2022-05-11" version="1.60.23" />
+    <release date="2022-05-09" version="1.60.178" />
+  </releases>
+</component>
