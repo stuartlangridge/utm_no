@@ -40,7 +40,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 """
-APP_VERSION = "1.0"
+# Important that APP_VERSION line has = "(num)" in so gitcommit script finds it
+APP_VERSION = "1.60.24"
 sv = os.environ.get("SNAP_VERSION")
 if sv:
     APP_VERSION = f"{sv} (snap)"
