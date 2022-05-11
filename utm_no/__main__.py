@@ -50,13 +50,29 @@ class UTMNOIndicator(GObject.GObject):
     def __init__(self):
         GObject.GObject.__init__(self)
 
-        icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "icons"))
+        icon_path = None
+        local_icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "icons"))
+        if os.path.exists("/.flatpak-info"):
+            # we're inside a flatpak
+            # we need to use the real path, not the in-the-flatpak
+            # path, so the panel can read it
+            import configparser
+            try:
+                c = configparser.ConfigParser(interpolation=None)
+                c.read("/.flatpak-info")
+                real_fs_path = c.get('Instance', 'app-path', fallback=None)
+                if real_fs_path:
+                    icon_path = os.path.join(real_fs_path, "utm_no", "icons")
+            except Exception as e:
+                logging.error(f"Tried to read /.flatpak-info but failed", e)
+        if not icon_path:
+            icon_path = local_icon_path
         self.panel_eyes_closed_icon = os.path.abspath(os.path.join(icon_path, "panel-eyes-full-closed.svg"))
         self.panel_eyes_left_icon = os.path.abspath(os.path.join(icon_path, "panel-eyes-left.svg"))
         self.panel_eyes_right_icon = os.path.abspath(os.path.join(icon_path, "panel-eyes-right.svg"))
         self.panel_eyes_half_right_icon = os.path.abspath(os.path.join(icon_path, "panel-eyes-half-right.svg"))
         self.panel_disabled_icon = os.path.abspath(os.path.join(icon_path, "panel-eyes-disabled.svg"))
-        self.app_icon = os.path.abspath(os.path.join(icon_path, "utm_no.svg"))
+        self.app_icon = os.path.abspath(os.path.join(local_icon_path, "utm_no.svg"))
 
         self.ind = AppIndicator.Indicator.new(
             APP_ID, self.panel_eyes_closed_icon,
@@ -127,14 +143,14 @@ class UTMNOIndicator(GObject.GObject):
         try:
             success, contents, _ = f.load_contents_finish(res)
         except GLib.Error as e:
-            logging.warn(
+            logging.warning(
                 f"couldn't restore settings (error: {e}), so assuming they're blank")
             contents = "{}"
 
         try:
             data = json.loads(contents)
         except Exception as e:
-            logging.warn(
+            logging.warning(
                 f"Warning: settings file seemed to be invalid json (error: {e}), so assuming blank")
             data = {}
         self.mpaused.set_active(data.get("enabled", True))
