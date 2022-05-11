@@ -13,7 +13,6 @@ rename-desktop-file: utm_no.desktop
 rename-appdata-file: utm_no.metainfo.xml
 rename-icon: utm_no
 
-
 modules:
   - name: utm_no
     buildsystem: simple
@@ -25,7 +24,6 @@ modules:
       - install -D utm_no/icons/utm_no.svg /app/share/icons/hicolor/scalable/apps/utm_no.svg
       - install -D snap/gui/utm_no.desktop /app/share/applications/utm_no.desktop
       - install -D flatpak/utm_no.metainfo.xml /app/share/metainfo/utm_no.metainfo.xml
-      - ls -lR /app/share/icons
     sources:
       - type: dir
         path: ..

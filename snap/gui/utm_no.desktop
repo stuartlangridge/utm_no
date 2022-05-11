@@ -9,4 +9,4 @@ Icon=${SNAP}/utm_no/icons/utm_no.svg
 Exec=utm-no
 Terminal=false
 Keywords=links;tracking;privacy;urls;clipboard;
-Categories=GTK;
+Categories=GTK;Utility
