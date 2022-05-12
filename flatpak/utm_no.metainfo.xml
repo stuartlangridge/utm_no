@@ -31,6 +31,7 @@
   <url type="bugtracker">https://github.com/stuartlangridge/utm_no/issues</url>
   <url type="donation">https://paypal.me/stuartlangridge</url>
   <releases>
+    <release date="2022-05-12" version="1.60.26" />
     <release date="2022-05-11" version="1.60.25" />
     <release date="2022-05-11" version="1.60.24" />
   </releases>
