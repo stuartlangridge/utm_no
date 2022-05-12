@@ -51,4 +51,4 @@ modules:
       url: https://files.pythonhosted.org/packages/37/45/946c02767aabb873146011e665728b680884cd8fe70dde973c640e45b775/certifi-2021.10.8-py2.py3-none-any.whl
       sha256: d62a0163eb4c2344ac042ab2bdf75399a71a2d8c7d47eac2e2ee91b9d6339569
 
-  - flatpak/shared-modules/libappindicator/libappindicator-gtk3-introspection-12.10.json
+  - shared-modules/libappindicator/libappindicator-gtk3-introspection-12.10.json
