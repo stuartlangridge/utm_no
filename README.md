@@ -10,5 +10,6 @@ Remove tracking parameters from copied URLs, for Ubuntu and other Linux OSes. In
 ![banner](https://img.youtube.com/vi/kXws6EvgAwQ/maxresdefault.jpg)
 
 [![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/utm-no)
+[![Get it from Flathub](https://www.kryogenix.org/code/utm_no/img/flathub-badge-en.svg)](https://flathub.org/apps/details/org.kryogenix.utm_no)
 
 (for techies: run as `python3 -m utm_no`)

@@ -9,7 +9,7 @@
   <summary>Remove tracking parameters from copied URLs</summary>
   <description>
     <p>You know how when you get a link from somewhere it's got all that 
-    <code>utm_source=exploiter, utm_medium=banner</code> rubbish in it? And as a service when
+    utm_source=exploiter, utm_medium=banner rubbish in it? And as a service when
     you're pasting this oh-so-hilarious link to your friends so they can share
     in the joy, you remove all that stuff?</p>
     <p>What if the computer did it for you?</p>
@@ -31,6 +31,8 @@
   <url type="bugtracker">https://github.com/stuartlangridge/utm_no/issues</url>
   <url type="donation">https://paypal.me/stuartlangridge</url>
   <releases>
+    <release date="2022-05-16" version="1.60.31">Bugs fixed</release>
+    <release date="2022-05-16" version="1.60.31">Bugs fixed</release>
     <release date="2022-05-12" version="1.60.30" />
     <release date="2022-05-12" version="1.60.27" />
     <release date="2022-05-12" version="1.60.26" />
